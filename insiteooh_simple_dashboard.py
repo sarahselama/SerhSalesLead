@@ -7,9 +7,29 @@ tion with feedback system
 import streamlit as st
 import pandas as pd
 import json
+import re
 from pathlib import Path
 from collections import defaultdict
-from brand_validator import normalize_brand_name
+
+# Inline normalize function to avoid external dependencies
+def normalize_brand_name(brand_name: str) -> str:
+    """Lightly clean brand name - preserve AI's consistency."""
+    # Handle NaN, None, or non-string types
+    if brand_name is None or (isinstance(brand_name, float) and pd.isna(brand_name)):
+        return 'Unknown'
+    
+    # Convert to string if not already
+    brand_name = str(brand_name)
+    
+    if not brand_name or brand_name.strip() == '':
+        return 'Unknown'
+    
+    # Only basic cleanup - preserve what AI extracted
+    cleaned = brand_name.strip()
+    cleaned = cleaned.rstrip('.,;:')  # Remove trailing punctuation
+    cleaned = re.sub(r'\s+', ' ', cleaned)  # Fix double spaces
+    
+    return cleaned
 
 st.set_page_config(
     page_title="OOH Sales Leads - InsiteOOH",
